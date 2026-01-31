@@ -1,0 +1,902 @@
+/* ======================================================
+   RESET / BASE
+   ====================================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: "Fuzzy Bubbles", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+ background: #020617;
+  color: #f8fafc;
+}
+
+/* ======================================================
+   BODY / APP CONTAINER
+   ====================================================== */
+
+body {
+  margin: 0;
+  background: #020617;
+}
+
+#app {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+}
+
+/* ======================================================
+   HEADER
+   ====================================================== */
+
+#match-header {
+  padding: 1.25rem 1rem 1rem;
+  text-align: center;
+}
+
+#app-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color:  #d38757;   /* rolig blå, matcher resten av UI */
+}
+
+/* Teams */
+
+.teams {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.teams input {
+  width: 150px;
+  padding: 0.55rem;
+  border-radius: 10px;
+
+  background-color: #020617 !important;
+  color: #f8fafc;
+
+  border: 1.5px solid rgba(147,197,253,0.6);
+
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* ===============================
+   NØYTRALISER AUTOFILL / FOCUS
+   =============================== */
+
+.teams input:-webkit-autofill,
+.teams input:-webkit-autofill:hover,
+.teams input:-webkit-autofill:focus,
+.teams input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #020617 inset !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border: 1.5px solid rgba(147,197,253,0.6);
+}
+
+.vs {
+  opacity: 0.6;
+}
+
+/* Date / Time Card */
+
+.match-meta-card {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: center;
+}
+
+.match-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  padding: 0.45rem 0.6rem;
+  border-radius: 999px;          /* pill-form */
+  background-color: #020617;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 2px 8px rgba(0,0,0,0.35);
+}
+
+.match-meta input {
+  border-radius: 12px;           /* mykere hjørner */
+  border: none;
+
+  padding: 0.55rem 0.6rem;
+  font-size: 0.9rem;
+
+  background-color: #0f172a;     /* matcher app-bakgrunn */
+  color: #f8fafc;
+
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.6),
+    inset 0 -1px 0 rgba(255,255,255,0.05);
+}
+.match-meta input::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  opacity: 0.7;
+}
+
+#matchDate {
+  width: 138px;
+  text-align: center;
+}
+
+#matchTime {
+  width: 88px;
+  text-align: center;
+}
+
+/* ======================================================
+   CLOCK / SCORE
+   ====================================================== */
+
+#clock-section {
+  padding: 1.25rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#game-clock {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.4rem;
+  white-space: nowrap;
+}
+#game-clock .overtime {
+  font-size: 0.4em;
+  opacity: 0.9;
+  margin-left: 6px;
+}
+
+#scoreboard {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.9rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+#period-indicator {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* ======================================================
+   GLASS + METALL BUTTON SYSTEM
+   ====================================================== */
+
+button {
+  font-family: "Fuzzy Bubbles", system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  cursor: pointer;
+
+  /* Solid base */
+  background-color: #1e293b;
+  color: #f8fafc;
+
+  /* Metallisk ramme */
+  border: 0px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(#1e293b, #1e293b),
+    linear-gradient(
+      135deg,
+      #e0f2fe,
+      #7dd3fc,
+      #38bdf8,
+      #7dd3fc,
+      #e0f2fe
+    );
+
+  /* Subtil glow */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -1px 0 rgba(0,0,0,0.5),
+    0 0 8px rgba(56,189,248,0.35);
+
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+
+button:active {
+  transform: scale(0.98);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -1px 0 rgba(0,0,0,0.55),
+    0 0 6px rgba(56,189,248,0.25);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  background-image: none;
+  border: none;
+  backdrop-filter: none;
+}
+
+/* ======================================================
+   CONTROL BUTTONS
+   ====================================================== */
+
+#controls,
+#lineup-control {
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+#controls button,
+#lineupBtn {
+  width: 100%;
+}
+
+/* Start */
+
+#startBtn {
+  background-image:
+    linear-gradient(#16a34a, #15803d),
+    linear-gradient(
+      135deg,
+      #e0f2fe,
+      #7dd3fc,
+      #38bdf8,
+      #7dd3fc,
+      #e0f2fe
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -1px 0 rgba(0,0,0,0.5),
+    0 0 10px rgba(34,197,94,0.5);
+}
+
+/* Pause */
+
+#pauseBtn {
+  background-image:
+    linear-gradient(#dc2626, #991b1b),
+    linear-gradient(
+      135deg,
+      #fee2e2,
+      #fca5a5,
+      #ef4444,
+      #fca5a5,
+      #fee2e2
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -1px 0 rgba(0,0,0,0.6),
+    0 0 10px rgba(239,68,68,0.5);
+}
+
+#resumeBtn {
+  background-image:
+    linear-gradient(#16a34a, #15803d),
+    linear-gradient(
+      135deg,
+      #e0f2fe,
+      #7dd3fc,
+      #38bdf8,
+      #7dd3fc,
+      #e0f2fe
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -1px 0 rgba(0,0,0,0.5),
+    0 0 6px rgba(34,197,94,0.35);
+}
+
+#endBtn {
+  background-image:
+    linear-gradient(#dc2626, #991b1b),
+    linear-gradient(
+      135deg,
+      #fee2e2,
+      #fca5a5,
+      #ef4444,
+      #fca5a5,
+      #fee2e2
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -1px 0 rgba(0,0,0,0.6),
+    0 0 6px rgba(239,68,68,0.35);
+}
+
+/* ======================================================
+   EVENTS / GOALS
+   ====================================================== */
+
+#events {
+  padding: 0.75rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 23, 0.9),
+    rgba(2, 6, 23, 0.7)
+  );
+  color: #e5e7eb;
+}
+
+.team-events {
+  background: rgba(255,255,255,0.04);
+  border-radius: 18px;
+  padding: 0.9rem;
+  text-align: center;
+}
+
+.team-events h3 {
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.goalBtn {
+  font-size: 0.95rem;
+  padding: 0.65rem 0.9rem;
+
+  background-image:
+    linear-gradient(#2563eb, #1d4ed8),
+    linear-gradient(
+      135deg,
+      #e0f2fe,
+      #7dd3fc,
+      #38bdf8,
+      #7dd3fc,
+      #e0f2fe
+    );
+}
+
+#event-log {
+  padding: 0.75rem 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* ⬅️ midtstiller */
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 23, 0.85),
+    rgba(2, 6, 23, 1)
+  );
+}
+
+#event-log h3 {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  opacity: 0.4;
+  margin-bottom: 0.4rem;
+}
+#eventList {
+  list-style: none;
+  width: 100%;
+  max-width: 260px;     /* ⬅️ smal = diskret */
+  text-align: center;
+
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+#eventList li {
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+
+/* ======================================================
+   EXTRA EVENTS
+   ====================================================== */
+
+#extra-events {
+  padding: 0.75rem 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+#lineupBtn,
+#subBtn,
+#cardBtn {
+  background-color: #334155;
+  background-image:
+    linear-gradient(#334155, #334155),
+    linear-gradient(
+      135deg,
+      #e0f2fe,
+      #7dd3fc,
+      #38bdf8,
+      #7dd3fc,
+      #e0f2fe
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -1px 0 rgba(0,0,0,0.5),
+    0 0 6px rgba(56,189,248,0.25);
+}
+
+
+/* ======================================================
+   MODALS (klar for senere JS)
+   ====================================================== */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 380px;
+  padding: 1.2rem;
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+}
+.modal.hidden {
+  display: none;
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.modal-section {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-section label {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.modal-section input[type="text"],
+.modal-section select {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: none;
+  background: #020617;
+  color: #f8fafc;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+.hidden {
+  display: none !important;
+}
+.playing-time {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+}
+
+.playing-time h4 {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.playing-time ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.playing-time li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 4px 0;
+}
+#squadList {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+#squadList li {
+  padding: 6px 0;
+  font-size: 0.9rem;
+}
+
+.squad-player {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hidden {
+  display: none;
+}
+
+.secondary-btn {
+  margin-top: 12px;
+}
+.playing-time-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 12px 0;
+}
+
+#togglePlayingTimeBtn {
+  align-self: center;
+}
+
+.playing-time {
+  width: 100%;
+  max-width: 320px; /* matcher kort-bredden i UI */
+  margin-top: 8px;
+}
+/* ===============================
+   SPILLERTROPP – LAYOUT
+   =============================== */
+
+.squad-row {
+  display: grid;
+  grid-template-columns: 90px 90px 1fr;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+/* Starter = grønn rad */
+.squad-row.is-starter {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+/* Checkbox-wrapper */
+.squad-row label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+/* Spillernavn */
+.squad-row .player-name {
+  text-align: right;
+  font-weight: 500;
+}
+/* Spillernavn – statusfarger */
+.player-name {
+  color: #dc2626; /* rød = ikke starter */
+  transition: color 0.15s ease;
+}
+
+.squad-row.is-starter .player-name {
+  color: #22c55e; /* grønn = starter */
+}
+
+.squad-row.not-present .player-name {
+  color: #9ca3af; /* grå = ikke tilstede */
+}
+.meta-field {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-field label {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  text-align: center;
+}
+
+.meta-field input {
+  width: 90px;
+  text-align: center;
+}
+#squadBtn {
+  background-image:
+    linear-gradient(#2563eb, #1d4ed8); /* ren blå */
+  background-color: #2563eb;          /* fallback */
+
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.35),
+    0 0 10px rgba(37,99,235,0.45);
+
+  transition:
+    background-image 0.2s ease,
+    transform 0.1s ease;
+}
+
+#squadBtn:hover {
+  background-image:
+    linear-gradient(#1d4ed8, #1e40af);
+}
+
+#squadBtn:active {
+  transform: scale(0.97);
+}
+
+#squadBtn:disabled {
+  background-image: none;
+  background-color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+button {
+  -webkit-tap-highlight-color: transparent; /* fjerner mobil-blink */
+  outline: none;                             /* fjerner focus-flash */
+}
+#cardModal .modal-content {
+  background: linear-gradient(180deg, #020617, #0f172a);
+  border-radius: 20px;
+  padding: 1.4rem;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+#cardModal select {
+  appearance: none;
+  background: #020617;
+  color: #f8fafc;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(255,255,255,0.1);
+
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.7),
+    0 0 0 rgba(0,0,0,0);
+
+  font-size: 0.9rem;
+}
+#cardModal .card-types {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0.8rem;
+}
+
+#cardModal .card-types label {
+  flex: 1;
+  text-align: center;
+  padding: 0.45rem 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+
+  background: #020617;
+  border: 1px solid rgba(255,255,255,0.12);
+  opacity: 0.8;
+}
+
+#cardModal input[type="radio"] {
+  display: none;
+}
+
+#cardModal input[type="radio"]:checked + span {
+  opacity: 1;
+  background: linear-gradient(#2563eb, #1d4ed8);
+  box-shadow: 0 0 8px rgba(37,99,235,0.5);
+}
+#cardModal .modal-actions button:first-child {
+  background: #020617;
+  opacity: 0.75;
+}
+
+#cardModal .modal-actions button:last-child {
+  background-image:
+    linear-gradient(#2563eb, #1d4ed8);
+  box-shadow: 0 0 10px rgba(37,99,235,0.45);
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 340px;
+  padding: 1.6rem;
+  border-radius: 18px;
+
+  background: linear-gradient(180deg, #020617, #0f172a);
+  color: #f8fafc;
+
+  box-shadow:
+    0 30px 60px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.modal-card h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.modal-card input {
+  width: 100%;
+  margin-bottom: 0.6rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: #020617;
+  color: #f8fafc;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
+.link-btn {
+  margin-top: 0.8rem;
+  background: none;
+  border: none;
+  color: #93c5fd;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.modal-actions.vertical {
+  flex-direction: column;
+}
+
+.modal-actions.vertical button {
+  width: 100%;
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid rgba(147,197,253,0.35);
+  color: #93c5fd;
+  box-shadow: none;
+}
+
+.card-team-row {
+  display: flex;
+  flex-direction: row;   /* ⬅️ DETTE manglet */
+  gap: 80px;
+  justify-content: center;
+}
+
+.radio-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-team-row .radio-pill {
+  font-size: 1.2rem;      /* ca 16px – tydelig, men ikke dominerende */
+  font-weight: 500;     /* matcher knappestilen ellers i appen */
+}
+/* ===============================
+   HJEMME / BORTE – TOGGLE
+   =============================== */
+
+.venue-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.venue-toggle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s ease;
+}
+
+/* Hjemmekamp */
+.venue-toggle.home {
+  background: rgba(34,197,94,0.18);
+  color: #86efac;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Bortekamp */
+.venue-toggle.away {
+  background: rgba(239,68,68,0.18);   /* rød tone, lav opasitet */
+  color: #fecaca;                     /* lys rød tekst */
+}
+
+/* Klikk-feedback */
+.venue-toggle:active {
+  transform: scale(0.96);
+}
+/* ===============================
+   NY KAMP-KNAPP
+   =============================== */
+
+.venue-toggle.new-match {
+  background: rgba(37, 99, 235, 0.25);   /* blå */
+  color: #93c5fd;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    0 0 8px rgba(37,99,235,0.4);
+}
+.login-message {
+  min-height: 1.2em;
+  text-align: center;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+.login-message.error {
+  color: #fca5a5;
+}
+
+.login-message.success {
+  color: #86efac;
+}
