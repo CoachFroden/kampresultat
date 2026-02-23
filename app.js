@@ -1,9 +1,11 @@
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
+import {
   getFirestore,
+  collection,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -12,11 +14,8 @@ import { initializeApp } from
 import {
   getAuth,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence,
-  sendPasswordResetEmail
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -30,7 +29,21 @@ const firebaseConfig = {
 
 initializeApp(firebaseConfig);
 const auth = getAuth();
+
 const db = getFirestore();
+
+function setLoginLoading(isLoading) {
+  const loginBtn = document.getElementById("loginBtn");
+  const registerBtn = document.getElementById("registerBtn");
+
+  if (loginBtn) loginBtn.disabled = isLoading;
+  if (registerBtn) registerBtn.disabled = isLoading;
+
+  if (isLoading) {
+    setLoginMessage("Jobber…");
+  }
+}
+
 
 /* ======================================================
    GLOBAL MATCH STATE
@@ -529,6 +542,8 @@ startBtn.addEventListener("click", async () => {
     alert("Du må være logget inn");
     return;
   }
+  document.getElementById("preMatchMeta")
+  .classList.add("hidden-meta");
 
   readMatchMetaFromUI();
 
@@ -536,6 +551,12 @@ startBtn.addEventListener("click", async () => {
     alert("Legg inn begge lagnavn før start.");
     return;
   }
+  
+  if (!matchState.meta.date || !matchState.meta.startTime) {
+  alert("Du må sette dato og starttid før kampen starter.");
+  return;
+}
+
 
   matchState.matchId = crypto.randomUUID();
   matchState.createdAt = new Date().toISOString();
@@ -608,7 +629,7 @@ addEvent(pauseText);
 
 });
 
-endBtn.addEventListener("click", () => {
+endBtn.addEventListener("click", async () => {
   if (matchState.timer.startTimestamp) {
     matchState.timer.elapsedMs +=
       Date.now() - matchState.timer.startTimestamp;
@@ -628,6 +649,9 @@ if (venueBtn) {
   venueBtn.textContent = "Ny kamp";
   venueBtn.classList.remove("home", "away");
   venueBtn.classList.add("new-match");
+  
+  document.getElementById("preMatchMeta")
+  .classList.remove("hidden-meta");
 }
 
 periodIndicator.textContent = "Kamp ferdig";
@@ -647,7 +671,7 @@ updateControls();
   addEvent("Kamp ferdig");
   updatePlayingTimeUI();
   
-  saveFinalMatch();
+await saveFinalMatch();
 
   console.log("TOTAL SPILLETID (ms):", matchState.timer.elapsedMs);
 });
@@ -920,13 +944,6 @@ function setLoginMessage(text, type = "") {
   el.className = `login-message ${type}`;
 }
 
-function setLoginLoading(isLoading) {
-  const loginBtn = document.getElementById("loginBtn");
-  const registerBtn = document.getElementById("registerBtn");
-
-  if (loginBtn) loginBtn.disabled = isLoading;
-  if (registerBtn) registerBtn.disabled = isLoading;
-}
 
 document.getElementById("squadBtn").addEventListener("click", openSquadModal);
 
@@ -1178,35 +1195,40 @@ document.getElementById("saveSquadBtn").addEventListener("click", () => {
 	if (matchState.status !== "NOT_STARTED") {
   return;
 }
-  matchState.players.home = {};
-  matchState.squad.onField.home = [];
+matchState.players.home = {};
+matchState.squad.onField.home = [];
 
-  document.querySelectorAll("#squadList li").forEach(li => {
-    const id = li.dataset.playerId;
-    const [present, starter] = li.querySelectorAll("input");
+document.querySelectorAll("#squadList li").forEach(li => {
+  const id = li.dataset.playerId;
+  const [present, starter] = li.querySelectorAll("input");
 
-    const base = HOME_SQUAD.find(p => p.id === id);
+  const base = HOME_SQUAD.find(p => p.id === id);
 
-    matchState.players.home[id] = {
-  id,
-  name: base.name,
-  present: present.checked,
-  starter: starter.checked,
-  intervals: [],
-  cards: []   // ⬅️ LEGG DENNE LINJEN HER
-};
+  // 🔴 Hvis ikke tilstede → hopp over helt
+  if (!present.checked) {
+    return;
+  }
 
-    if (starter.checked) {
-     addToField(id);
-    }
-  });
+  // ✅ Kun tilstedeværende spillere legges inn
+  matchState.players.home[id] = {
+    id,
+    name: base.name,
+    present: true,
+    starter: starter.checked,
+    intervals: [],
+    cards: []
+  };
 
-  // ⬇️ NYTT
-  matchState.lineupConfirmed = true;
-  updateControls();
+  if (starter.checked) {
+    addToField(id);
+  }
+});
 
-  document.getElementById("squadModal").classList.add("hidden");
-  updatePlayingTimeUI();
+matchState.lineupConfirmed = true;
+updateControls();
+document.getElementById("squadModal").classList.add("hidden");
+updatePlayingTimeUI();
+
 });
 
 document.getElementById("cancelSquadBtn")
@@ -1249,136 +1271,59 @@ function updateStarterCounter() {
 }
 
 function getMatchSummary() {
+  const result =
+    `${matchState.score.our}-${matchState.score.their}`;
+
   return {
     meta: matchState.meta,
     score: matchState.score,
+    result,
     events: matchState.events,
-    playingTime: Object.values(matchState.players.home).map(p => ({
-      id: p.id,
-      name: p.name,
-      minutes: calculateMinutesPlayed(p)
-    }))
+    playingTime: Object.values(matchState.players.home)
+      .filter(p => p.present)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        minutes: calculateMinutesPlayed(p)
+      }))
   };
 }
 
-const loginView = document.getElementById("loginView");
-const appView = document.getElementById("app");
-
-const loginModal = document.getElementById("loginModal");
-
-function showLogin() {
-  loginModal.classList.remove("hidden");
-  appView.classList.add("hidden");
-}
-
-function showApp() {
-  loginModal.classList.add("hidden");
-  appView.classList.remove("hidden");
-}
-
-// 🔒 husk innlogging på enheten
-setPersistence(auth, browserLocalPersistence).then(() => {
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    showLogin();
-    return;
-  }
+
+if (!user) {
+  window.location.href = "index.html";
+  return;
+}
 
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
 
-  if (!snap.exists()) {
-    await setDoc(userRef, {
-      name: user.email.split("@")[0],
-      email: user.email,
-      role: "coach",
-      createdAt: new Date().toISOString()
-    });
-  }
+if (!snap.exists()) {
+  await signOut(auth);
+  window.location.href = "index.html";
+  return;
+}
 
-  matchState.ownerUid = user.uid;
-  showApp(); // 🔑 her lukkes modalen automatisk
+  const data = snap.data();
+
+if (!["coach", "assistantCoach"].includes(data.role)) {
+  await signOut(auth);
+  window.location.href = "index.html";
+  return;
+}
+
+if (data.role !== "coach" && !user.emailVerified) {
+  await signOut(auth);
+  window.location.href = "index.html";
+  return;
+}
+
+// ✅ Godkjent – gjør ingenting
+matchState.userRole = data.role;
+
 });
 
-});
-
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("emailInput").value.trim();
-  const password = document.getElementById("passwordInput").value;
-
-  setLoginMessage("");
-  setLoginLoading(true);
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    setLoginMessage("Innlogging vellykket", "success");
-  } catch (err) {
-    setLoginLoading(false);
-
-    if (
-      err.code === "auth/user-not-found" ||
-      err.code === "auth/wrong-password"
-    ) {
-      setLoginMessage("Feil e-post eller passord", "error");
-    } else {
-      setLoginMessage("Innlogging feilet", "error");
-    }
-  }
-});
-
-document.getElementById("registerBtn").addEventListener("click", async () => {
-  const email = document.getElementById("emailInput").value.trim();
-  const password = document.getElementById("passwordInput").value;
-
-  setLoginMessage("");
-
-  if (!email || !password) {
-    setLoginMessage("Skriv inn e-post og passord", "error");
-    return;
-  }
-
-  if (password.length < 6) {
-    setLoginMessage("Passord må være minst 6 tegn", "error");
-    return;
-  }
-
-  setLoginLoading(true);
-
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    setLoginMessage(
-      "Bruker opprettet – du er nå logget inn",
-      "success"
-    );
-  } catch (err) {
-    setLoginLoading(false);
-
-    if (err.code === "auth/email-already-in-use") {
-      setLoginMessage(
-        "Bruker finnes allerede – logg inn i stedet",
-        "error"
-      );
-    } else {
-      setLoginMessage("Kunne ikke opprette bruker", "error");
-    }
-  }
-});
-
-document
-  .getElementById("resetPasswordBtn")
-  .addEventListener("click", async () => {
-    const email =
-      document.getElementById("emailInput").value.trim();
-
-    if (!email) {
-      alert("Skriv inn e-post først");
-      return;
-    }
-
-    await sendPasswordResetEmail(auth, email);
-    alert("E-post for tilbakestilling er sendt");
-  });
-  
 async function saveNewMatch() {
   const user = auth.currentUser;
   if (!user) {
@@ -1386,123 +1331,143 @@ async function saveNewMatch() {
     return;
   }
 
-  const matchRef = doc(
-    db,
-    "users",
-    user.uid,
-    "matches",
-    matchState.matchId
-  );
+  /* ======================================================
+     BESTEM HVOR DET SKAL LAGRES BASERT PÅ ROLLE
+     ====================================================== */
 
-  // 🔹 Kampinfo (statisk)
+  let matchRef;
+
+  if (matchState.userRole === "coach") {
+    matchRef = doc(
+      db,
+      "matches",
+      matchState.matchId
+    );
+  }
+
+  else if (matchState.userRole === "assistantCoach") {
+    matchRef = doc(
+      db,
+      "assistantMatches",
+      user.uid,
+      "matches",
+      matchState.matchId
+    );
+  }
+
+  else {
+    console.error("Ugyldig rolle:", matchState.userRole);
+    return;
+  }
+
+  /* ======================================================
+     DATA
+     ====================================================== */
+
   const meta = {
     ourTeam: matchState.meta.ourTeam,
     opponent: matchState.meta.opponent,
-    venue: matchState.meta.venue,          // home / away
+    venue: matchState.meta.venue,
     date: matchState.meta.date,
     startTime: matchState.meta.startTime,
     halfLengthMin: matchState.meta.halfLengthMin
   };
 
-  // 🔹 Spillere: tilstede + startellever
-const present = [];
-const starters = [];
+  const present = [];
+  const starters = [];
 
-Object.values(matchState.players.home).forEach(player => {
-  if (player.present) {
-    present.push({
-      id: player.id,
-      name: player.name
-    });
-  }
+  Object.values(matchState.players.home).forEach(player => {
+    if (player.present) {
+      present.push({
+        id: player.id,
+        name: player.name
+      });
+    }
 
-  if (player.starter) {
-    starters.push({
-      id: player.id,
-      name: player.name
-    });
-  }
-});
+    if (player.starter) {
+      starters.push({
+        id: player.id,
+        name: player.name
+      });
+    }
+  });
 
   const matchData = {
     meta,
     status: "LIVE",
-
     score: {
       our: 0,
       their: 0
     },
-
     squad: {
       present,
       starters
     },
-
+    ownerUid: user.uid,
+    role: matchState.userRole,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   };
 
   await setDoc(matchRef, matchData);
 
-  console.log("Kamp opprettet i Firestore:", matchState.matchId);
+  console.log(
+    "Kamp opprettet:",
+    matchState.matchId,
+    "Lagringssted:",
+    matchState.userRole
+  );
 }
 
 async function saveFinalMatch() {
   const user = auth.currentUser;
-  if (!user) {
-    console.error("Ikke innlogget");
+  if (!user) return;
+
+  let matchRef;
+
+  if (matchState.userRole === "coach") {
+    matchRef = doc(
+      db,
+      "matches",
+      matchState.matchId
+    );
+  }
+
+  else if (matchState.userRole === "assistantCoach") {
+    matchRef = doc(
+      db,
+      "assistantMatches",
+      user.uid,
+      "matches",
+      matchState.matchId
+    );
+  }
+
+  else {
+    console.error("Ugyldig rolle ved lagring");
     return;
   }
 
-  if (!matchState.matchId) {
-    console.error("Ingen matchId – kan ikke lagre kamp");
-    return;
-  }
+  const summary = getMatchSummary();
 
-  if (matchState._finalSaved) {
-    console.warn("Sluttkamp er allerede lagret");
-    return;
-  }
-
-  matchState._finalSaved = true;
-
-  const matchRef = doc(
-    db,
-    "users",
-    user.uid,
-    "matches",
-    matchState.matchId
+  await setDoc(
+    matchRef,
+    {
+      ...summary,
+      status: "ENDED",
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
   );
 
-  // 🔹 Sluttstatus
-  const finalData = {
-    status: "ENDED",
-
-    score: {
-      our: matchState.score.our,
-      their: matchState.score.their
-    },
-
-    events: matchState.events,
-
-    playingTime: Object.values(matchState.players.home).map(player => ({
-      id: player.id,
-      name: player.name,
-      minutes: calculateMinutesPlayed(player),
-      cards: player.cards ?? []
-    })),
-
-    endedAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  };
-
-  try {
-    await setDoc(matchRef, finalData, { merge: true });
-    console.log("Kamp ferdig lagret i Firestore:", matchState.matchId);
-  } catch (err) {
-    console.error("Feil ved lagring av sluttkamp:", err);
-  }
+  console.log(
+    "Kamp avsluttet og lagret:",
+    matchState.matchId,
+    "Rolle:",
+    matchState.userRole
+  );
 }
+
 
 /* ======================================================
    INITIAL UI STATE
@@ -1556,6 +1521,13 @@ async function saveFinalMatch() {
   updateControls();
 }
 
-
 updateControls();
 updateVenueToggle();
+
+window._auth = auth;
+
+document.getElementById("logoutBtn")
+  ?.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+  });

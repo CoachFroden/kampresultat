@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kampstatistikk</title>
+  <link rel="stylesheet" href="statistikk.css" />
+</head>
+<body>
+
+  <h1>Kampstatistikk - 2026</h1>
+
+  <section>
+    <h2>Kamper</h2>
+    <table id="matchesTable">
+      <thead>
+        <tr>
+          <th>Dato</th>
+          <th>Kamp</th>
+          <th>H/B</th>
+          <th>Resultat</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+  
+<div class="stats-controls">
+  <button id="totalBtn">Totalt</button>
+
+  <select id="matchSelect">
+    <option value="">Velg kamp</option>
+  </select>
+
+  <button id="printBtn">Skriv ut / PDF</button>
+</div>
+<h2 id="printMatchTitle" class="print-only"></h2>
+
+  <section>
+    <h2>Spillerstatistikk</h2>
+    <table id="playersTable">
+      <thead>
+        <tr>
+          <th>Navn</th>
+          <th>Kamper</th>
+          <th>Minutter</th>
+		  <th>Mål</th>
+          <th>Gule</th>
+          <th>Røde</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  
+<script type="module" src="statistikk.js"></script>
+
+</body>
+</html>

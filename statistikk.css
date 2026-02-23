@@ -1,0 +1,140 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 2rem;
+}
+
+h1, h2 {
+  margin-bottom: 0.6rem;
+}
+
+section {
+  margin-bottom: 2.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.6rem;
+  border-bottom: 1px solid #334155;
+  text-align: left;
+}
+
+th {
+  color: #38bdf8;
+  font-weight: 600;
+}
+/* ===== Statistikk-kontroller ===== */
+
+.stats-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+/* Felles stil for knapper */
+.stats-controls button {
+  background: #1e293b;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.stats-controls button:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+/* Total-knapp (primær) */
+#totalBtn {
+  background: #0f172a;
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+#totalBtn:hover {
+  background: rgba(56,189,248,0.12);
+}
+
+/* Dropdown */
+.stats-controls select {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+/* Print-knapp */
+#printBtn {
+  margin-left: auto; /* skyver den til høyre */
+  background: #052e16;
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+#printBtn:hover {
+  background: rgba(34,197,94,0.15);
+}
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  .stats-controls {
+    display: none;
+  }
+
+  table {
+    color: black;
+  }
+
+  th {
+    color: black;
+  }
+}
+/* Skjult på skjerm */
+.print-only {
+  display: none;
+}
+
+@media print {
+  /* Vis print-tittel */
+  .print-only {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  /* Skjul kontroller og kamp-tabell */
+  .stats-controls,
+  #matchesTable,
+  h2:has(+ #matchesTable) {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  table {
+    color: black;
+  }
+
+  th {
+    color: black;
+  }
+}
