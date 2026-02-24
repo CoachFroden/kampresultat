@@ -74,8 +74,6 @@ body {
   font-size: 1.05rem;
   font-weight: 600;
 
-  appearance: none;
-  -webkit-appearance: none;
 }
 
 /* ===============================
@@ -1223,4 +1221,9 @@ input[type="time"] {
 
 .match-meta {
   overflow: hidden;
+}
+
+input[type="date"],
+input[type="time"] {
+  box-shadow: none;
 }
