@@ -1187,3 +1187,14 @@ select,
 textarea {
   font-size: 16px;
 }
+
+input[type="date"],
+input[type="time"] {
+  appearance: auto;
+  -webkit-appearance: auto;
+
+  background-color: #0f172a;
+  color: #f8fafc;
+
+  min-height: 44px;
+}
