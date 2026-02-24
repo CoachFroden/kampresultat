@@ -1203,3 +1203,13 @@ input[type="date"]::-webkit-datetime-edit,
 input[type="time"]::-webkit-datetime-edit {
   color: #f8fafc;
 }
+
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+input[type="date"],
+input[type="time"] {
+  -webkit-text-fill-color: #f8fafc;
+}
