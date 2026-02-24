@@ -1227,3 +1227,14 @@ input[type="date"],
 input[type="time"] {
   box-shadow: none;
 }
+
+input[type="date"],
+input[type="time"] {
+  all: revert;
+  font-family: inherit;
+  font-size: 16px;
+  background: #0f172a;
+  color: #f8fafc;
+  border-radius: 10px;
+  padding: 0 12px;
+}
