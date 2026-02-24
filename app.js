@@ -56,7 +56,8 @@ const matchState = {
     date: "",
     startTime: "",
     halfLengthMin: 45,
-    venue: "home"   // ✅ riktig
+    venue: "home",	// ✅ riktig
+	type: "league"
   },
 
   status: "NOT_STARTED",
@@ -320,7 +321,11 @@ function readMatchMetaFromUI() {
   const half = Number(halfLengthInput.value);
   matchState.meta.halfLengthMin =
     Number.isFinite(half) && half > 0 ? half : 45;
+
+  const typeSelect = document.getElementById("matchType");
+  matchState.meta.type = typeSelect ? typeSelect.value : "league";
 }
+
 const cardHomeWrapper =
   document.getElementById("cardHomeWrapper");
 const cardAwayWrapper =
@@ -1364,14 +1369,15 @@ async function saveNewMatch() {
      DATA
      ====================================================== */
 
-  const meta = {
-    ourTeam: matchState.meta.ourTeam,
-    opponent: matchState.meta.opponent,
-    venue: matchState.meta.venue,
-    date: matchState.meta.date,
-    startTime: matchState.meta.startTime,
-    halfLengthMin: matchState.meta.halfLengthMin
-  };
+const meta = {
+  ourTeam: matchState.meta.ourTeam,
+  opponent: matchState.meta.opponent,
+  venue: matchState.meta.venue,
+  date: matchState.meta.date,
+  startTime: matchState.meta.startTime,
+  halfLengthMin: matchState.meta.halfLengthMin,
+  type: matchState.meta.type
+};
 
   const present = [];
   const starters = [];

@@ -27,7 +27,6 @@
 
   <!-- KAMPHEADER -->
   <header id="match-header">
-  <button id="logoutBtn">Logg ut</button>
   <h1 id="app-title">Kampregistrering</h1>
 
   <div class="teams">
@@ -46,14 +45,7 @@
 />
 
   </div>
-  
-  <div class="venue-toggle-wrapper">
-  <button id="venueToggleBtn" class="venue-toggle home">
-    Hjemmekamp
-  </button>
-</div>
-
-
+ 
 <div id="preMatchMeta">
 <div class="match-meta-card">
   <div class="match-meta">
@@ -65,7 +57,18 @@
   <option value="40">2 × 40 min</option>
   <option value="45">2 × 45 min</option>
 </select>
-  </div>
+
+  <select id="matchType">
+    <option value="league">Seriekamp</option>
+    <option value="cup">Cupkamp</option>
+    <option value="friendly">Treningskamp</option>
+  </select>
+
+  <button id="venueToggleBtn" class="venue-toggle home">
+    Hjemmekamp
+  </button>
+
+</div>
 </div>
 </div>
 
@@ -129,6 +132,9 @@
     <h3>Hendelser</h3>
     <ul id="eventList"></ul>
   </section>
+  <div class="logout-wrapper">
+  <button id="logoutBtn" class="ghost-btn">Logg ut</button>
+</div>
 
   <!-- MODAL: KORT -->
 <div class="modal hidden" id="cardModal">
