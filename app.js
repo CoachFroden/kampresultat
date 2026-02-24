@@ -1537,3 +1537,14 @@ document.getElementById("logoutBtn")
     await signOut(auth);
     window.location.href = "index.html";
   });
+  
+  window.addEventListener("load", () => {
+  setTimeout(() => {
+    document.querySelectorAll('input[type="date"], input[type="time"]')
+      .forEach(input => {
+        input.style.display = "none";
+        input.offsetHeight; // trigger reflow
+        input.style.display = "";
+      });
+  }, 50);
+});
