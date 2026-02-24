@@ -1548,3 +1548,18 @@ document.getElementById("logoutBtn")
       });
   }, 50);
 });
+
+// Sett dagens dato og klokkeslett automatisk ved oppstart
+document.addEventListener("DOMContentLoaded", function () {
+  const now = new Date();
+
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+
+  document.getElementById("matchDate").value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById("matchTime").value = `${hh}:${min}`;
+});
