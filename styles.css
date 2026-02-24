@@ -1213,3 +1213,14 @@ input[type="date"],
 input[type="time"] {
   -webkit-text-fill-color: #f8fafc;
 }
+
+.match-meta input,
+.match-meta select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.match-meta {
+  overflow: hidden;
+}
