@@ -1181,3 +1181,9 @@ section {
 #halfLength {
   grid-column: 1 / -1;
 }
+
+input,
+select,
+textarea {
+  font-size: 16px;
+}
