@@ -30,6 +30,16 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 const auth = getAuth();
 
+import { onAuthStateChanged } from 
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+});
+
 const db = getFirestore();
 
 function setLoginLoading(isLoading) {
