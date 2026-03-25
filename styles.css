@@ -1237,3 +1237,109 @@ input[type="date"],
 input[type="time"] {
   font-size: 16px;
 }
+
+#playingTimeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#playingTimeList li {
+  margin-bottom: 8px;
+}
+
+#playingTimeList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.05);
+}
+
+/* NAVN */
+.player-name {
+  font-weight: 600;
+}
+
+/* MINUTTER */
+.player-minutes {
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+#playingTimeList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.05);
+}
+
+/* STANDARD */
+.player-name {
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.player-minutes {
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+/* 🟢 på banen */
+#playingTimeList li.on .player-name {
+  color: #22c55e;
+}
+
+/* ⚪ benk */
+#playingTimeList li.bench .player-name {
+  color: #9ca3af;
+}
+
+/* =========================
+   ANBEFALING
+========================= */
+
+/* 🔴 bør ut */
+#playingTimeList li.tired .player-minutes {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* 🟡 bør inn */
+#playingTimeList li.fresh .player-minutes {
+  color: #facc15;
+  font-weight: 700;
+}
+
+#playingTimeList li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+}
+
+.pt-header {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  margin: 10px 4px 4px;
+  padding-top: 6px;
+
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
