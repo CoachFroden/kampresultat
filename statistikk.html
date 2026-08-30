@@ -7,63 +7,41 @@
   <link rel="stylesheet" href="statistikk.css" />
 </head>
 <body>
-  <main class="page-shell">
-    <header class="page-header no-print">
-      <div>
-        <p class="eyebrow">Samnanger G14</p>
-        <h1>Kampstatistikk</h1>
-      </div>
-      <nav class="top-nav">
-        <a href="kamp.html">⚽ Kamp</a>
-        <a href="motstandere.html">🔎 Motstandere</a>
-      </nav>
-    </header>
 
-    <p id="statsStatus" class="status no-print">Laster kamper…</p>
+  <h1>Kampstatistikk - 2026</h1>
 
-    <div class="stats-controls no-print">
-      <button id="totalBtn" type="button">📊 Totalt</button>
-      <label class="match-picker">
-        <span>Velg enkeltkamp</span>
-        <select id="matchSelect" aria-label="Velg kamp">
-          <option value="">Velg kamp</option>
-        </select>
-      </label>
-      <button id="printBtn" type="button">🖨️ Skriv ut / PDF</button>
-    </div>
+  <div class="stats-controls">
+    <button id="totalBtn" type="button">📊 Totalt</button>
 
-    <h2 id="printMatchTitle" class="print-only"></h2>
+    <select id="matchSelect" aria-label="Velg kamp">
+      <option value="">Velg kamp</option>
+    </select>
 
-    <section id="matchDetail" class="match-detail"></section>
+    <button id="printBtn" type="button">🖨️ Skriv ut / PDF</button>
+  </div>
 
-    <!-- Beholdes skjult fordi statistikk.js bruker elementet internt. -->
-    <table id="matchesTable" hidden aria-hidden="true">
+  <p id="statsStatus" class="stats-status">Laster statistikk…</p>
+  <h2 id="printMatchTitle" class="print-only"></h2>
+
+  <section>
+    <h2 id="statsTitle">Spillerstatistikk</h2>
+    <table id="playersTable">
+      <thead>
+        <tr>
+          <th>Navn</th>
+          <th>👕 Kamper</th>
+          <th>⏱️ Minutter</th>
+          <th>⚽ Mål</th>
+          <th>🟨 Gule</th>
+          <th>🟥 Røde</th>
+        </tr>
+      </thead>
       <tbody></tbody>
     </table>
+  </section>
 
-    <section class="table-card">
-      <div class="section-head">
-        <h2 id="statsTitle">Spillerstatistikk – totalt</h2>
-      </div>
-      <div class="table-scroll">
-        <table id="playersTable">
-          <thead>
-            <tr>
-              <th>Spiller</th>
-              <th><span class="stat-icon" aria-hidden="true">👕</span> Kamper</th>
-              <th><span class="stat-icon" aria-hidden="true">⏱️</span> Minutter</th>
-              <th><span class="stat-icon" aria-hidden="true">⚽</span> Mål</th>
-              <th><span class="stat-icon" aria-hidden="true">🟨</span> Gule</th>
-              <th><span class="stat-icon" aria-hidden="true">🟥</span> Røde</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+  <p class="back-link"><a href="kamp.html">← Tilbake til kamp</a></p>
 
   <script type="module" src="statistikk.js"></script>
-  <script src="statistikk-ui.js"></script>
 </body>
 </html>
