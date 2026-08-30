@@ -3,44 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kampstatistikk</title>
+  <title>Statistikk</title>
   <link rel="stylesheet" href="statistikk.css" />
 </head>
 <body>
+  <main class="stats-page">
+    <header class="stats-header">
+      <a class="square-btn" href="kamp.html" aria-label="Tilbake til kamp">‹</a>
+      <div class="stats-heading">
+        <p>SAMNANGER G14</p>
+        <h1>Statistikk</h1>
+      </div>
+      <a class="square-btn" href="motstandere.html" aria-label="Motstandere">↗</a>
+    </header>
 
-  <h1>Kampstatistikk - 2026</h1>
+    <section class="summary-grid" aria-label="Resultatoversikt">
+      <article class="summary-card"><span>Kamper</span><strong id="gamesValue">0</strong></article>
+      <article class="summary-card"><span>Seier</span><strong id="winsValue">0</strong></article>
+      <article class="summary-card"><span>Uavgjort</span><strong id="drawsValue">0</strong></article>
+      <article class="summary-card"><span>Tap</span><strong id="lossesValue">0</strong></article>
+    </section>
 
-  <div class="stats-controls">
-    <button id="totalBtn" type="button">📊 Totalt</button>
+    <section class="goal-card">
+      <span>Målforskjell</span>
+      <strong id="goalsValue">0–0</strong>
+    </section>
 
-    <select id="matchSelect" aria-label="Velg kamp">
-      <option value="">Velg kamp</option>
-    </select>
+    <div class="match-picker-wrap">
+      <select id="matchSelect" class="match-picker" aria-label="Velg kamp">
+        <option value="">Velg kamp</option>
+      </select>
+    </div>
 
-    <button id="printBtn" type="button">🖨️ Skriv ut / PDF</button>
-  </div>
+    <p id="statsStatus" class="stats-status">Laster statistikk…</p>
 
-  <p id="statsStatus" class="stats-status">Laster statistikk…</p>
-  <h2 id="printMatchTitle" class="print-only"></h2>
+    <section class="players-section">
+      <p class="section-label">SPILLERE</p>
+      <h2 id="statsTitle">Sesongstatistikk</h2>
 
-  <section>
-    <h2 id="statsTitle">Spillerstatistikk</h2>
-    <table id="playersTable">
-      <thead>
-        <tr>
-          <th>Navn</th>
-          <th>👕 Kamper</th>
-          <th>⏱️ Minutter</th>
-          <th>⚽ Mål</th>
-          <th>🟨 Gule</th>
-          <th>🟥 Røde</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <p class="back-link"><a href="kamp.html">← Tilbake til kamp</a></p>
+      <div class="table-scroll">
+        <table id="playersTable">
+          <thead>
+            <tr>
+              <th>Spiller</th>
+              <th>K</th>
+              <th>Min</th>
+              <th>Mål</th>
+              <th>G</th>
+              <th>R</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
   <script type="module" src="statistikk.js"></script>
 </body>
