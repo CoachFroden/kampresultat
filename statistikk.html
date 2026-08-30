@@ -2,58 +2,80 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kampstatistikk</title>
   <link rel="stylesheet" href="statistikk.css" />
 </head>
 <body>
+  <main class="page-shell">
+    <header class="page-header no-print">
+      <div>
+        <p class="eyebrow">Samnanger G14</p>
+        <h1>Kampstatistikk</h1>
+      </div>
+      <nav class="top-nav">
+        <a href="kamp.html">Kamp</a>
+        <a href="motstandere.html">Motstandere</a>
+      </nav>
+    </header>
 
-  <h1>Kampstatistikk - 2026</h1>
+    <p id="statsStatus" class="status no-print">Laster kamper…</p>
 
-  <section>
-    <h2>Kamper</h2>
-    <table id="matchesTable">
-      <thead>
-        <tr>
-          <th>Dato</th>
-          <th>Kamp</th>
-          <th>H/B</th>
-          <th>Resultat</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-  
-<div class="stats-controls">
-  <button id="totalBtn">Totalt</button>
+    <div class="stats-controls no-print">
+      <button id="totalBtn" type="button">Totalt</button>
+      <select id="matchSelect" aria-label="Velg kamp">
+        <option value="">Velg kamp</option>
+      </select>
+      <button id="printBtn" type="button">Skriv ut / PDF</button>
+    </div>
 
-  <select id="matchSelect">
-    <option value="">Velg kamp</option>
-  </select>
+    <h2 id="printMatchTitle" class="print-only"></h2>
 
-  <button id="printBtn">Skriv ut / PDF</button>
-</div>
-<h2 id="printMatchTitle" class="print-only"></h2>
+    <section id="matchDetail" class="match-detail"></section>
 
-  <section>
-    <h2>Spillerstatistikk</h2>
-    <table id="playersTable">
-      <thead>
-        <tr>
-          <th>Navn</th>
-          <th>Kamper</th>
-          <th>Minutter</th>
-		  <th>Mål</th>
-          <th>Gule</th>
-          <th>Røde</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+    <section class="table-card no-print">
+      <div class="section-head">
+        <h2>Kamper</h2>
+        <span>Trykk på en kamp for detaljert statistikk</span>
+      </div>
+      <div class="table-scroll">
+        <table id="matchesTable">
+          <thead>
+            <tr>
+              <th>Dato</th>
+              <th>Kamp</th>
+              <th>H/B</th>
+              <th>Resultat</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
 
-  
-<script type="module" src="statistikk.js"></script>
+    <section class="table-card">
+      <div class="section-head">
+        <h2 id="statsTitle">Spillerstatistikk – totalt</h2>
+      </div>
+      <div class="table-scroll">
+        <table id="playersTable">
+          <thead>
+            <tr>
+              <th>Navn</th>
+              <th>Kamper</th>
+              <th>Minutter</th>
+              <th>Mål</th>
+              <th>Gule</th>
+              <th>Røde</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
+  <script type="module" src="statistikk.js"></script>
 </body>
 </html>
