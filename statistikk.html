@@ -14,45 +14,32 @@
         <h1>Kampstatistikk</h1>
       </div>
       <nav class="top-nav">
-        <a href="kamp.html">Kamp</a>
-        <a href="motstandere.html">Motstandere</a>
+        <a href="kamp.html">⚽ Kamp</a>
+        <a href="motstandere.html">🔎 Motstandere</a>
       </nav>
     </header>
 
     <p id="statsStatus" class="status no-print">Laster kamper…</p>
 
     <div class="stats-controls no-print">
-      <button id="totalBtn" type="button">Totalt</button>
-      <select id="matchSelect" aria-label="Velg kamp">
-        <option value="">Velg kamp</option>
-      </select>
-      <button id="printBtn" type="button">Skriv ut / PDF</button>
+      <button id="totalBtn" type="button">📊 Totalt</button>
+      <label class="match-picker">
+        <span>Velg enkeltkamp</span>
+        <select id="matchSelect" aria-label="Velg kamp">
+          <option value="">Velg kamp</option>
+        </select>
+      </label>
+      <button id="printBtn" type="button">🖨️ Skriv ut / PDF</button>
     </div>
 
     <h2 id="printMatchTitle" class="print-only"></h2>
 
     <section id="matchDetail" class="match-detail"></section>
 
-    <section class="table-card no-print">
-      <div class="section-head">
-        <h2>Kamper</h2>
-        <span>Trykk på en kamp for detaljert statistikk</span>
-      </div>
-      <div class="table-scroll">
-        <table id="matchesTable">
-          <thead>
-            <tr>
-              <th>Dato</th>
-              <th>Kamp</th>
-              <th>H/B</th>
-              <th>Resultat</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+    <!-- Beholdes skjult fordi statistikk.js bruker elementet internt. -->
+    <table id="matchesTable" hidden aria-hidden="true">
+      <tbody></tbody>
+    </table>
 
     <section class="table-card">
       <div class="section-head">
@@ -62,12 +49,12 @@
         <table id="playersTable">
           <thead>
             <tr>
-              <th>Navn</th>
-              <th>Kamper</th>
-              <th>Minutter</th>
-              <th>Mål</th>
-              <th>Gule</th>
-              <th>Røde</th>
+              <th>Spiller</th>
+              <th><span class="stat-icon" aria-hidden="true">👕</span> Kamper</th>
+              <th><span class="stat-icon" aria-hidden="true">⏱️</span> Minutter</th>
+              <th><span class="stat-icon" aria-hidden="true">⚽</span> Mål</th>
+              <th><span class="stat-icon" aria-hidden="true">🟨</span> Gule</th>
+              <th><span class="stat-icon" aria-hidden="true">🟥</span> Røde</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -77,5 +64,6 @@
   </main>
 
   <script type="module" src="statistikk.js"></script>
+  <script src="statistikk-ui.js"></script>
 </body>
 </html>
