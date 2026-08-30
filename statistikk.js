@@ -10,8 +10,6 @@ import {
   getFirestore,
   collection,
   getDocs,
-  doc,
-  getDoc,
   query,
   where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -47,8 +45,7 @@ onAuthStateChanged(auth, async user => {
   try {
     statusEl.textContent = "Laster statistikk…";
 
-    const loaded = await loadMatches(user.uid);
-    allMatches = loaded
+    allMatches = (await loadMatches(user.uid))
       .filter(isCompletedMatch)
       .sort(sortMatchesNewestFirst);
 
@@ -64,60 +61,19 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
+// VIKTIG: Statistikken skal KUN lese fra toppnivå-samlingen `matches`.
 async function loadMatches(uid) {
-  const matches = new Map();
+  const ownMatches = query(
+    collection(db, "matches"),
+    where("ownerUid", "==", uid)
+  );
 
-  let role = "coach";
-  try {
-    const userSnap = await getDoc(doc(db, "users", uid));
-    if (userSnap.exists()) {
-      role = userSnap.data().role || role;
-    }
-  } catch (error) {
-    console.warn("Kunne ikke lese brukerrolle", error);
-  }
-
-  if (role === "assistantCoach") {
-    await addCollection(matches, collection(db, "assistantMatches", uid, "matches"));
-  } else {
-    try {
-      const ownMatches = query(
-        collection(db, "matches"),
-        where("ownerUid", "==", uid)
-      );
-      await addCollection(matches, ownMatches);
-    } catch (error) {
-      console.warn("Kunne ikke lese nye kampdata", error);
-    }
-  }
-
-  // Eldre versjoner av appen lagret kampene her.
-  try {
-    await addCollection(matches, collection(db, "users", uid, "matches"), false);
-  } catch (error) {
-    console.warn("Ingen eldre kampdata tilgjengelig", error);
-  }
-
-  return [...matches.values()];
-}
-
-async function addCollection(target, ref, overwrite = true) {
-  const snap = await getDocs(ref);
-  snap.docs.forEach(d => {
-    if (!overwrite && target.has(d.id)) return;
-    target.set(d.id, { id: d.id, ...d.data() });
-  });
+  const snap = await getDocs(ownMatches);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 function isCompletedMatch(match) {
-  if (match?.status === "ENDED") return true;
-  if (match?.status === "LIVE" || match?.status === "PAUSED") return false;
-
-  // Støtte for gamle ferdiglagrede kamper som ikke hadde statusfelt.
-  return Boolean(
-    match?.result ||
-    (Array.isArray(match?.playingTime) && match.playingTime.length)
-  );
+  return match?.status === "ENDED";
 }
 
 function sortMatchesNewestFirst(a, b) {
@@ -224,7 +180,7 @@ function buildPlayerStats(matches) {
       stats[player.id].red += Number(player.red || 0);
     });
 
-    dedupeStartEvents(match.events || []).forEach(event => {
+    (match.events || []).forEach(event => {
       if (
         event?.type === "goal" &&
         event.team === "home" &&
@@ -328,18 +284,6 @@ function cardCounts(player) {
   };
 }
 
-function dedupeStartEvents(events) {
-  let startSeen = false;
-
-  return events.filter(event => {
-    const text = event?.text || String(event || "");
-    if (!text.includes("Kamp startet")) return true;
-    if (startSeen) return false;
-    startSeen = true;
-    return true;
-  });
-}
-
 function scoreText(match) {
   return `${match.score?.our ?? "-"}–${match.score?.their ?? "-"}`;
 }
@@ -351,9 +295,7 @@ function venueText(match) {
 function formatDate(value) {
   if (!value) return "Ukjent dato";
   const [year, month, day] = value.split("-");
-  return year && month && day
-    ? `${day}.${month}.${year}`
-    : value;
+  return year && month && day ? `${day}.${month}.${year}` : value;
 }
 
 function escapeHtml(value) {
