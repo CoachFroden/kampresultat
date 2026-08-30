@@ -1,264 +1,221 @@
+console.log("Stats-side lastet");
+
+/* ======================================================
+   FIREBASE (CDN – selvstendig)
+   ====================================================== */
+
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
 import { getAuth, onAuthStateChanged } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import {
   getFirestore,
   collection,
-  getDocs,
-  query,
-  where
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  getDocs
+} from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAKZMu2HZPmmoZ1fFT7DNA9Q6ystbKEPgE",
   authDomain: "samnanger-g14-f10a1.firebaseapp.com",
   projectId: "samnanger-g14-f10a1",
   storageBucket: "samnanger-g14-f10a1.firebasestorage.app",
   messagingSenderId: "926427862844",
-  appId: "1:926427862844:web:eeb814a349e9bfd701b039"
+  appId: "1:926427862844:web:eeb814a349e9bfd701b039",
+  measurementId: "G-XJ4X7NXQCM"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const matchSelect = document.getElementById("matchSelect");
-const statusEl = document.getElementById("statsStatus");
-const statsTitle = document.getElementById("statsTitle");
-const tbody = document.querySelector("#playersTable tbody");
-
-const gamesValue = document.getElementById("gamesValue");
-const winsValue = document.getElementById("winsValue");
-const drawsValue = document.getElementById("drawsValue");
-const lossesValue = document.getElementById("lossesValue");
-const goalsValue = document.getElementById("goalsValue");
-
+/* ======================================================
+   GLOBAL STATE
+   ====================================================== */
+let selectedMatchForPrint = null;
 let allMatches = [];
+
+/* ======================================================
+   AUTH
+   ====================================================== */
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
-    window.location.href = "index.html";
+    console.warn("Ikke innlogget – ingen data");
     return;
   }
 
-  try {
-    statusEl.textContent = "Laster statistikk…";
-    allMatches = (await loadMatches(user.uid))
-      .filter(isCompletedMatch)
-      .sort(sortMatchesNewestFirst);
+  allMatches = await loadMatches(user.uid);
 
-    populateMatchSelect(allMatches);
-    renderView(allMatches, null);
-    statusEl.textContent = "";
-  } catch (error) {
-    console.error("Kunne ikke laste statistikk", error);
-    statusEl.textContent = "Kunne ikke laste statistikken.";
-  }
+  renderMatches(allMatches);
+  populateMatchSelect(allMatches);
+  renderPlayerStats(allMatches);
 });
 
-// Statistikken leser KUN fra toppnivå-samlingen matches.
+/* ======================================================
+   FIRESTORE
+   ====================================================== */
+
 async function loadMatches(uid) {
-  const ref = query(
-    collection(db, "matches"),
-    where("ownerUid", "==", uid)
-  );
+  const ref = collection(db, "users", uid, "matches");
   const snap = await getDocs(ref);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  return snap.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
 }
 
-function isCompletedMatch(match) {
-  return match?.status === "ENDED";
-}
+/* ======================================================
+   UI CONTROLS
+   ====================================================== */
 
-function sortMatchesNewestFirst(a, b) {
-  const aKey = `${a.meta?.date || ""}T${a.meta?.startTime || "00:00"}`;
-  const bKey = `${b.meta?.date || ""}T${b.meta?.startTime || "00:00"}`;
-  return bKey.localeCompare(aKey);
-}
+const totalBtn = document.getElementById("totalBtn");
+const matchSelect = document.getElementById("matchSelect");
 
-matchSelect.addEventListener("change", () => {
-  if (!matchSelect.value) {
-    renderView(allMatches, null);
-    return;
-  }
+totalBtn.onclick = () => {
+  matchSelect.hidden = false;
+  matchSelect.value = "";
+  selectedMatchForPrint = null;
 
-  const match = allMatches.find(m => m.id === matchSelect.value);
-  if (match) renderView([match], match);
-});
+  document.getElementById("printMatchTitle").textContent =
+    "Spillerstatistikk – Totalt";
+
+  renderPlayerStats(allMatches);
+};
+
+matchSelect.onchange = () => {
+  const id = matchSelect.value;
+  if (!id) return;
+
+  const match = allMatches.find(m => m.id === id);
+  if (!match) return;
+
+  selectedMatchForPrint = match;
+
+  document.getElementById("printMatchTitle").textContent =
+    `${match.meta.ourTeam} – ${match.meta.opponent}
+     (${match.meta.venue === "away" ? "Bortekamp" : "Hjemmekamp"},
+      ${match.meta.date})`;
+
+  renderPlayerStats([match]);
+};
 
 function populateMatchSelect(matches) {
+  matchSelect.hidden = false;
   matchSelect.innerHTML = `<option value="">Velg kamp</option>`;
 
   matches.forEach(match => {
-    const option = document.createElement("option");
-    option.value = match.id;
-    option.textContent = `${formatDate(match.meta?.date)} · ${match.meta?.opponent || "Motstander"} · ${scoreText(match)}`;
-    matchSelect.appendChild(option);
+    const opt = document.createElement("option");
+    opt.value = match.id;
+    opt.textContent =
+      `${match.meta?.date || ""} – ${match.meta?.opponent || ""}`;
+    matchSelect.appendChild(opt);
   });
 }
 
-function renderView(matches, selectedMatch) {
-  renderSummary(matches);
-  renderPlayers(matches);
+/* ======================================================
+   KAMP-LISTE
+   ====================================================== */
 
-  if (selectedMatch) {
-    statsTitle.textContent = `Kampstatistikk – ${selectedMatch.meta?.opponent || "Motstander"}`;
-  } else {
-    statsTitle.textContent = "Sesongstatistikk";
-  }
-}
+function renderMatches(matches) {
+  const tbody =
+    document.querySelector("#matchesTable tbody");
 
-function renderSummary(matches) {
-  let wins = 0;
-  let draws = 0;
-  let losses = 0;
-  let goalsFor = 0;
-  let goalsAgainst = 0;
-
-  matches.forEach(match => {
-    const our = Number(match.score?.our ?? 0);
-    const their = Number(match.score?.their ?? 0);
-
-    goalsFor += our;
-    goalsAgainst += their;
-
-    if (our > their) wins += 1;
-    else if (our < their) losses += 1;
-    else draws += 1;
-  });
-
-  gamesValue.textContent = matches.length;
-  winsValue.textContent = wins;
-  drawsValue.textContent = draws;
-  lossesValue.textContent = losses;
-  goalsValue.textContent = `${goalsFor}–${goalsAgainst}`;
-}
-
-function renderPlayers(matches) {
-  const stats = buildPlayerStats(matches);
   tbody.innerHTML = "";
 
-  const players = Object.values(stats).sort((a, b) =>
-    b.minutes - a.minutes ||
-    b.goals - a.goals ||
-    a.name.localeCompare(b.name, "no")
-  );
+  matches.forEach(match => {
+    const tr = document.createElement("tr");
 
-  players.forEach(player => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${escapeHtml(player.name)}</td>
-      <td>${player.matches}</td>
-      <td>${player.minutes}</td>
-      <td>${player.goals}</td>
-      <td>${player.yellow}</td>
-      <td>${player.red}</td>
+    tr.innerHTML = `
+      <td>${match.meta?.date || ""}</td>
+      <td>${match.meta?.ourTeam || ""} – ${match.meta?.opponent || ""}</td>
+      <td>${match.meta?.venue === "away" ? "Borte" : "Hjemme"}</td>
+      <td>${match.score?.our ?? "-"} – ${match.score?.their ?? "-"}</td>
     `;
-    tbody.appendChild(row);
-  });
 
-  if (!players.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Ingen spillerdata registrert.</td></tr>`;
-  }
+    tbody.appendChild(tr);
+  });
 }
 
-function buildPlayerStats(matches) {
+/* ======================================================
+   SPILLERSTATISTIKK
+   ====================================================== */
+
+function renderPlayerStats(matches) {
   const stats = {};
 
   matches.forEach(match => {
-    const playersObject = normalizePlayersObject(match.players);
-    const rows = playerRowsForMatch(match, playersObject);
+    if (!match.players) return;
 
-    rows.forEach(player => {
-      if (!player.id) return;
-      ensurePlayer(stats, player.id, player.name);
-      stats[player.id].matches += 1;
-      stats[player.id].minutes += Math.max(0, Math.round(Number(player.minutes || 0)));
-      stats[player.id].yellow += Number(player.yellow || 0);
-      stats[player.id].red += Number(player.red || 0);
-    });
+    // 1️⃣ Bygg spillergrunnlag
 
-    (match.events || []).forEach(event => {
-      if (event?.type === "goal" && event.team === "home" && event.playerId) {
-        ensurePlayer(stats, event.playerId, event.playerName || playersObject[event.playerId]?.name || "Ukjent");
+    if (Array.isArray(match.players)) {
+      match.players.forEach(player => {
+        if (!player?.id) return;
+        accumulate(stats, player);
+      });
+    } else {
+      Object.entries(match.players).forEach(([id, player]) => {
+        if (!player) return;
+        accumulate(stats, {
+          id,
+          name: player.name,
+          minutes: player.minutes,
+          yellow: player.yellow,
+          red: player.red
+        });
+      });
+    }
+
+    // 2️⃣ Tell mål (kun Samnanger)
+
+    match.events?.forEach(event => {
+      if (
+        event.type === "goal" &&
+        event.team === "home" &&
+        event.playerId &&
+        stats[event.playerId]
+      ) {
         stats[event.playerId].goals += 1;
       }
     });
   });
 
-  return stats;
+  // 3️⃣ Render tabell
+
+  const tbody =
+    document.querySelector("#playersTable tbody");
+
+  tbody.innerHTML = "";
+
+  Object.values(stats).forEach(p => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.matches}</td>
+      <td>${p.minutes}</td>
+      <td>${p.goals}</td>
+      <td>${p.yellow}</td>
+      <td>${p.red}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
 }
 
-function normalizePlayersObject(players) {
-  if (!players) return {};
-  if (Array.isArray(players)) {
-    return Object.fromEntries(players.filter(p => p?.id).map(p => [p.id, p]));
-  }
-  // Ny kampstruktur lagrer spillerne direkte som {h1: {...}, h2: {...}}.
-  return players.home && typeof players.home === "object" ? players.home : players;
-}
+/* ======================================================
+   HELPER
+   ====================================================== */
 
-function playerRowsForMatch(match, playersObject) {
-  if (Array.isArray(match.playingTime) && match.playingTime.length) {
-    return match.playingTime.map(player => {
-      const source = playersObject[player.id] || {};
-      return {
-        id: player.id,
-        name: player.name || source.name || "Ukjent",
-        minutes: Number(player.minutes || 0),
-        yellow: yellowCount(source),
-        red: redCount(source)
-      };
-    });
-  }
-
-  return Object.entries(playersObject)
-    .filter(([, player]) => player?.present !== false)
-    .map(([id, player]) => ({
-      id,
-      name: player.name || "Ukjent",
-      minutes: calculateMinutes(player, match),
-      yellow: yellowCount(player),
-      red: redCount(player)
-    }));
-}
-
-function yellowCount(player) {
-  if (Array.isArray(player?.cards)) {
-    return player.cards.filter(card => card?.type === "yellow").length;
-  }
-  return Number(player?.yellow || 0);
-}
-
-function redCount(player) {
-  if (Array.isArray(player?.cards)) {
-    return player.cards.filter(card => card?.type === "red").length;
-  }
-  return player?.red ? 1 : 0;
-}
-
-function calculateMinutes(player, match) {
-  if (Number.isFinite(player?.minutes)) return Math.max(0, Math.round(player.minutes));
-  if (!Array.isArray(player?.intervals)) return 0;
-
-  const fallbackEnd = Number(match.timer?.elapsedMs) ||
-    ((Number(match.meta?.halfLengthMin) || 35) * 2 * 60 * 1000);
-
-  const totalMs = player.intervals.reduce((sum, interval) => {
-    const start = Number(interval?.in || 0);
-    const end = interval?.out == null ? fallbackEnd : Number(interval.out);
-    return sum + Math.max(0, end - start);
-  }, 0);
-
-  return Math.floor(totalMs / 60000);
-}
-
-function ensurePlayer(stats, id, name) {
-  if (!stats[id]) {
-    stats[id] = {
-      id,
-      name: name || "Ukjent",
+function accumulate(stats, player) {
+  if (!stats[player.id]) {
+    stats[player.id] = {
+      name: player.name,
       matches: 0,
       minutes: 0,
       goals: 0,
@@ -266,23 +223,15 @@ function ensurePlayer(stats, id, name) {
       red: 0
     };
   }
+
+  stats[player.id].matches += 1;
+  stats[player.id].minutes += player.minutes || 0;
+  stats[player.id].yellow += player.yellow || 0;
+  stats[player.id].red += player.red ? 1 : 0;
 }
 
-function scoreText(match) {
-  return `${match.score?.our ?? "-"}–${match.score?.their ?? "-"}`;
-}
+const printBtn = document.getElementById("printBtn");
 
-function formatDate(value) {
-  if (!value) return "Ukjent dato";
-  const [year, month, day] = String(value).split("-");
-  return year && month && day ? `${day}.${month}.${year}` : value;
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+printBtn.onclick = () => {
+  window.print();
+};
