@@ -1,11 +1,7 @@
-console.log("Stats-side lastet");
-
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
 import { getAuth, onAuthStateChanged } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
 import {
   getFirestore,
   collection,
@@ -27,14 +23,18 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let allMatches = [];
-
-const totalBtn = document.getElementById("totalBtn");
 const matchSelect = document.getElementById("matchSelect");
-const printBtn = document.getElementById("printBtn");
 const statusEl = document.getElementById("statsStatus");
 const statsTitle = document.getElementById("statsTitle");
-const printMatchTitle = document.getElementById("printMatchTitle");
+const tbody = document.querySelector("#playersTable tbody");
+
+const gamesValue = document.getElementById("gamesValue");
+const winsValue = document.getElementById("winsValue");
+const drawsValue = document.getElementById("drawsValue");
+const lossesValue = document.getElementById("lossesValue");
+const goalsValue = document.getElementById("goalsValue");
+
+let allMatches = [];
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -44,31 +44,26 @@ onAuthStateChanged(auth, async user => {
 
   try {
     statusEl.textContent = "Laster statistikk…";
-
     allMatches = (await loadMatches(user.uid))
       .filter(isCompletedMatch)
       .sort(sortMatchesNewestFirst);
 
     populateMatchSelect(allMatches);
-    showTotal();
-
-    statusEl.textContent = allMatches.length
-      ? `${allMatches.length} fullførte kamper i statistikken`
-      : "Ingen fullførte kamper funnet.";
+    renderView(allMatches, null);
+    statusEl.textContent = "";
   } catch (error) {
     console.error("Kunne ikke laste statistikk", error);
-    statusEl.textContent = "Kunne ikke laste statistikken. Prøv å laste siden på nytt.";
+    statusEl.textContent = "Kunne ikke laste statistikken.";
   }
 });
 
-// VIKTIG: Statistikken skal KUN lese fra toppnivå-samlingen `matches`.
+// Statistikken leser KUN fra toppnivå-samlingen matches.
 async function loadMatches(uid) {
-  const ownMatches = query(
+  const ref = query(
     collection(db, "matches"),
     where("ownerUid", "==", uid)
   );
-
-  const snap = await getDocs(ownMatches);
+  const snap = await getDocs(ref);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
@@ -82,51 +77,66 @@ function sortMatchesNewestFirst(a, b) {
   return bKey.localeCompare(aKey);
 }
 
-totalBtn.addEventListener("click", showTotal);
-
 matchSelect.addEventListener("change", () => {
   if (!matchSelect.value) {
-    showTotal();
+    renderView(allMatches, null);
     return;
   }
 
   const match = allMatches.find(m => m.id === matchSelect.value);
-  if (match) showMatch(match);
+  if (match) renderView([match], match);
 });
-
-printBtn.addEventListener("click", () => window.print());
-
-function showTotal() {
-  matchSelect.value = "";
-  statsTitle.textContent = "Spillerstatistikk – totalt";
-  printMatchTitle.textContent = "Spillerstatistikk – totalt";
-  renderPlayerStats(allMatches);
-}
-
-function showMatch(match) {
-  matchSelect.value = match.id;
-
-  const title = `${match.meta?.ourTeam || "Samnanger"} – ${match.meta?.opponent || "Motstander"}`;
-  statsTitle.textContent = `Spillerstatistikk – ${title}`;
-  printMatchTitle.textContent = `${title} (${formatDate(match.meta?.date)}, ${venueText(match)})`;
-
-  renderPlayerStats([match]);
-}
 
 function populateMatchSelect(matches) {
   matchSelect.innerHTML = `<option value="">Velg kamp</option>`;
 
   matches.forEach(match => {
-    const opt = document.createElement("option");
-    opt.value = match.id;
-    opt.textContent = `${formatDate(match.meta?.date)} – ${match.meta?.opponent || "Motstander"} (${scoreText(match)})`;
-    matchSelect.appendChild(opt);
+    const option = document.createElement("option");
+    option.value = match.id;
+    option.textContent = `${formatDate(match.meta?.date)} · ${match.meta?.opponent || "Motstander"} · ${scoreText(match)}`;
+    matchSelect.appendChild(option);
   });
 }
 
-function renderPlayerStats(matches) {
+function renderView(matches, selectedMatch) {
+  renderSummary(matches);
+  renderPlayers(matches);
+
+  if (selectedMatch) {
+    statsTitle.textContent = `Kampstatistikk – ${selectedMatch.meta?.opponent || "Motstander"}`;
+  } else {
+    statsTitle.textContent = "Sesongstatistikk";
+  }
+}
+
+function renderSummary(matches) {
+  let wins = 0;
+  let draws = 0;
+  let losses = 0;
+  let goalsFor = 0;
+  let goalsAgainst = 0;
+
+  matches.forEach(match => {
+    const our = Number(match.score?.our ?? 0);
+    const their = Number(match.score?.their ?? 0);
+
+    goalsFor += our;
+    goalsAgainst += their;
+
+    if (our > their) wins += 1;
+    else if (our < their) losses += 1;
+    else draws += 1;
+  });
+
+  gamesValue.textContent = matches.length;
+  winsValue.textContent = wins;
+  drawsValue.textContent = draws;
+  lossesValue.textContent = losses;
+  goalsValue.textContent = `${goalsFor}–${goalsAgainst}`;
+}
+
+function renderPlayers(matches) {
   const stats = buildPlayerStats(matches);
-  const tbody = document.querySelector("#playersTable tbody");
   tbody.innerHTML = "";
 
   const players = Object.values(stats).sort((a, b) =>
@@ -136,8 +146,8 @@ function renderPlayerStats(matches) {
   );
 
   players.forEach(player => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
+    const row = document.createElement("tr");
+    row.innerHTML = `
       <td>${escapeHtml(player.name)}</td>
       <td>${player.matches}</td>
       <td>${player.minutes}</td>
@@ -145,11 +155,11 @@ function renderPlayerStats(matches) {
       <td>${player.yellow}</td>
       <td>${player.red}</td>
     `;
-    tbody.appendChild(tr);
+    tbody.appendChild(row);
   });
 
   if (!players.length) {
-    tbody.innerHTML = `<tr><td colspan="6">Ingen spillerdata registrert.</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Ingen spillerdata registrert.</td></tr>`;
   }
 }
 
@@ -157,47 +167,21 @@ function buildPlayerStats(matches) {
   const stats = {};
 
   matches.forEach(match => {
-    const rows = playerRowsForMatch(match);
+    const playersObject = normalizePlayersObject(match.players);
+    const rows = playerRowsForMatch(match, playersObject);
 
     rows.forEach(player => {
       if (!player.id) return;
-
-      if (!stats[player.id]) {
-        stats[player.id] = {
-          id: player.id,
-          name: player.name || "Ukjent",
-          matches: 0,
-          minutes: 0,
-          goals: 0,
-          yellow: 0,
-          red: 0
-        };
-      }
-
+      ensurePlayer(stats, player.id, player.name);
       stats[player.id].matches += 1;
-      stats[player.id].minutes += Number(player.minutes || 0);
+      stats[player.id].minutes += Math.max(0, Math.round(Number(player.minutes || 0)));
       stats[player.id].yellow += Number(player.yellow || 0);
       stats[player.id].red += Number(player.red || 0);
     });
 
     (match.events || []).forEach(event => {
-      if (
-        event?.type === "goal" &&
-        event.team === "home" &&
-        event.playerId
-      ) {
-        if (!stats[event.playerId]) {
-          stats[event.playerId] = {
-            id: event.playerId,
-            name: event.playerName || "Ukjent",
-            matches: 0,
-            minutes: 0,
-            goals: 0,
-            yellow: 0,
-            red: 0
-          };
-        }
-
+      if (event?.type === "goal" && event.team === "home" && event.playerId) {
+        ensurePlayer(stats, event.playerId, event.playerName || playersObject[event.playerId]?.name || "Ukjent");
         stats[event.playerId].goals += 1;
       }
     });
@@ -206,53 +190,56 @@ function buildPlayerStats(matches) {
   return stats;
 }
 
-function playerRowsForMatch(match) {
-  const result = new Map();
-  const playersObject = !Array.isArray(match.players) && match.players
-    ? match.players
-    : {};
+function normalizePlayersObject(players) {
+  if (!players) return {};
+  if (Array.isArray(players)) {
+    return Object.fromEntries(players.filter(p => p?.id).map(p => [p.id, p]));
+  }
+  // Ny kampstruktur lagrer spillerne direkte som {h1: {...}, h2: {...}}.
+  return players.home && typeof players.home === "object" ? players.home : players;
+}
 
+function playerRowsForMatch(match, playersObject) {
   if (Array.isArray(match.playingTime) && match.playingTime.length) {
-    match.playingTime.forEach(player => {
+    return match.playingTime.map(player => {
       const source = playersObject[player.id] || {};
-      result.set(player.id, {
+      return {
         id: player.id,
         name: player.name || source.name || "Ukjent",
         minutes: Number(player.minutes || 0),
-        ...cardCounts(source)
-      });
-    });
-  } else if (Array.isArray(match.players)) {
-    match.players.forEach(player => {
-      if (!player?.id) return;
-      result.set(player.id, {
-        id: player.id,
-        name: player.name || "Ukjent",
-        minutes: Number(player.minutes || 0),
-        yellow: Number(player.yellow || 0),
-        red: player.red ? 1 : 0
-      });
-    });
-  } else {
-    Object.entries(playersObject).forEach(([id, player]) => {
-      if (!player) return;
-      result.set(id, {
-        id,
-        name: player.name || "Ukjent",
-        minutes: calculateSavedMinutes(player, match),
-        ...cardCounts(player)
-      });
+        yellow: yellowCount(source),
+        red: redCount(source)
+      };
     });
   }
 
-  return [...result.values()];
+  return Object.entries(playersObject)
+    .filter(([, player]) => player?.present !== false)
+    .map(([id, player]) => ({
+      id,
+      name: player.name || "Ukjent",
+      minutes: calculateMinutes(player, match),
+      yellow: yellowCount(player),
+      red: redCount(player)
+    }));
 }
 
-function calculateSavedMinutes(player, match) {
-  if (Number.isFinite(player?.minutes)) {
-    return Math.max(0, Math.round(player.minutes));
+function yellowCount(player) {
+  if (Array.isArray(player?.cards)) {
+    return player.cards.filter(card => card?.type === "yellow").length;
   }
+  return Number(player?.yellow || 0);
+}
 
+function redCount(player) {
+  if (Array.isArray(player?.cards)) {
+    return player.cards.filter(card => card?.type === "red").length;
+  }
+  return player?.red ? 1 : 0;
+}
+
+function calculateMinutes(player, match) {
+  if (Number.isFinite(player?.minutes)) return Math.max(0, Math.round(player.minutes));
   if (!Array.isArray(player?.intervals)) return 0;
 
   const fallbackEnd = Number(match.timer?.elapsedMs) ||
@@ -260,41 +247,34 @@ function calculateSavedMinutes(player, match) {
 
   const totalMs = player.intervals.reduce((sum, interval) => {
     const start = Number(interval?.in || 0);
-    const end = interval?.out == null
-      ? fallbackEnd
-      : Number(interval.out);
-
+    const end = interval?.out == null ? fallbackEnd : Number(interval.out);
     return sum + Math.max(0, end - start);
   }, 0);
 
   return Math.floor(totalMs / 60000);
 }
 
-function cardCounts(player) {
-  if (Array.isArray(player?.cards)) {
-    return {
-      yellow: player.cards.filter(card => card?.type === "yellow").length,
-      red: player.cards.filter(card => card?.type === "red").length
+function ensurePlayer(stats, id, name) {
+  if (!stats[id]) {
+    stats[id] = {
+      id,
+      name: name || "Ukjent",
+      matches: 0,
+      minutes: 0,
+      goals: 0,
+      yellow: 0,
+      red: 0
     };
   }
-
-  return {
-    yellow: Number(player?.yellow || 0),
-    red: player?.red ? 1 : 0
-  };
 }
 
 function scoreText(match) {
   return `${match.score?.our ?? "-"}–${match.score?.their ?? "-"}`;
 }
 
-function venueText(match) {
-  return match.meta?.venue === "away" ? "Bortekamp" : "Hjemmekamp";
-}
-
 function formatDate(value) {
   if (!value) return "Ukjent dato";
-  const [year, month, day] = value.split("-");
+  const [year, month, day] = String(value).split("-");
   return year && month && day ? `${day}.${month}.${year}` : value;
 }
 
