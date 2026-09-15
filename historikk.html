@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Tidligere kamper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="historikk.css" />
+</head>
+<body>
+  <main class="history-shell">
+    <header class="history-header">
+      <div>
+        <p class="eyebrow">KAMPARKIV</p>
+        <h1>Tidligere kamper</h1>
+        <p class="lead">Finn kampresultat og hendelser igjen, del dem på nytt og legg til glemte hendelser etter kampslutt.</p>
+      </div>
+      <a class="back-link" href="kamp.html">← Kampregistrering</a>
+    </header>
+
+    <div id="pageMessage" class="page-message" role="status"></div>
+
+    <section class="history-grid">
+      <aside class="panel matches-panel">
+        <div class="panel-title-row">
+          <h2>Kamper</h2>
+          <button id="reloadBtn" class="icon-btn" type="button" title="Oppdater">↻</button>
+        </div>
+        <div id="matchesList" class="matches-list">
+          <div class="empty-state">Henter kamper…</div>
+        </div>
+      </aside>
+
+      <section class="panel detail-panel" id="matchDetail">
+        <div class="empty-detail">
+          <div class="empty-icon">⚽</div>
+          <h2>Velg en kamp</h2>
+          <p>Resultat og hendelser vises her.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="eventDialog" class="event-dialog">
+    <form id="eventForm" method="dialog" class="event-form">
+      <div class="dialog-title-row">
+        <div>
+          <p class="eyebrow">ETTERREGISTRERING</p>
+          <h2>Legg til hendelse</h2>
+        </div>
+        <button id="closeEventDialog" class="icon-btn" type="button" aria-label="Lukk">×</button>
+      </div>
+
+      <label>
+        Hendelse
+        <select id="eventType" required>
+          <option value="goal">Mål</option>
+          <option value="yellow">Gult kort</option>
+          <option value="red">Rødt kort</option>
+          <option value="note">Annen hendelse</option>
+        </select>
+      </label>
+
+      <div id="teamRow">
+        <label>
+          Lag
+          <select id="eventTeam"></select>
+        </label>
+      </div>
+
+      <label id="minuteRow">
+        Minutt
+        <input id="eventMinute" type="number" min="1" inputmode="numeric" placeholder="f.eks. 42" />
+      </label>
+
+      <label id="homePlayerRow">
+        Spiller
+        <select id="eventPlayer"></select>
+      </label>
+
+      <label id="awayPlayerRow" class="hidden">
+        Spiller hos motstander <span class="muted">(valgfritt)</span>
+        <input id="opponentPlayer" type="text" placeholder="Navn eller draktnr" />
+      </label>
+
+      <label id="descriptionRow" class="hidden">
+        Beskrivelse
+        <textarea id="eventDescription" rows="3" placeholder="Hva skjedde?"></textarea>
+      </label>
+
+      <div class="dialog-actions">
+        <button id="cancelEventBtn" class="secondary-btn" type="button">Avbryt</button>
+        <button id="saveEventBtn" class="primary-btn" type="submit">Lagre hendelse</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="historikk.js"></script>
+</body>
+</html>
