@@ -164,7 +164,7 @@ function renderMatchList() {
   });
 }
 
-function renderMatchEmpty() {
+function renderEmptyDetail() {
   matchDetail.innerHTML = `
     <div class="empty-detail">
       <div class="empty-icon">⚽</div>
@@ -181,7 +181,7 @@ function selectMatch(matchId) {
 
 function renderSelectedMatch() {
   const match = allMatches.find(m => m.id === selectedMatchId);
-  if (!match) return renderMatchEmpty();
+  if (!match) return renderEmptyDetail();
 
   matchDetail.innerHTML = "";
   const content = document.createElement("div");
